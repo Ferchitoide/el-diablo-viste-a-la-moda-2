@@ -64,7 +64,7 @@ export default function ParejaPage() {
       <CharacterHero
         imageSrc="/characters/ensemble.png"
         name="Miranda, Andy y Emily"
-        displayName="Mi Amor"
+        displayName="Celeste"
         message={event.parejaMessage}
       />
 
@@ -103,7 +103,7 @@ export default function ParejaPage() {
                 <CoffeeIcon className="w-5 h-5 text-stone-300" />
               </div>
               <VIPInvitation
-                recipientName="Mi Pareja"
+                recipientName="Celeste"
                 event={event}
                 onRSVP={handleRSVP}
                 rsvpConfirmed={rsvpDone}

@@ -70,7 +70,7 @@ export default function AdminPage() {
       href:    "/mama",
     },
     {
-      name:    "MI PAREJA",
+      name:    "CELESTE",
       rsvp:    event.rsvpPareja,
       rsvpKey: "rsvpPareja"  as const,
       coffee:  event.coffeeOrders.pareja,
