@@ -31,13 +31,15 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (getSession() !== "admin") { router.replace("/"); return; }
-    setEvent(getEventData());
-    setReady(true);
+    getEventData().then((data) => {
+      setEvent(data);
+      setReady(true);
+    });
   }, [router]);
 
-  const save = () => {
+  const save = async () => {
     if (!event) return;
-    saveEventData(event);
+    await saveEventData(event);
     setSaved(true);
     setTimeout(() => setSaved(false), 2200);
   };

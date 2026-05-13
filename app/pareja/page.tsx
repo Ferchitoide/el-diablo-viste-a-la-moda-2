@@ -29,15 +29,16 @@ export default function ParejaPage() {
   useEffect(() => {
     const s = getSession();
     if (s !== "pareja" && s !== "admin") { router.replace("/"); return; }
-    const data = getEventData();
-    setEvent(data);
-    setRsvpDone(data.rsvpPareja);
-    setCoffeeOrder(data.coffeeOrders.pareja);
-    setReady(true);
+    getEventData().then((data) => {
+      setEvent(data);
+      setRsvpDone(data.rsvpPareja);
+      setCoffeeOrder(data.coffeeOrders.pareja);
+      setReady(true);
+    });
   }, [router]);
 
-  const handleRSVP = () => { confirmRSVP("pareja"); setRsvpDone(true); };
-  const handleDrink = (d: string) => { setCoffeeOrder(d); saveCoffeeOrder("pareja", d); };
+  const handleRSVP  = async () => { await confirmRSVP("pareja"); setRsvpDone(true); };
+  const handleDrink = async (d: string) => { setCoffeeOrder(d); await saveCoffeeOrder("pareja", d); };
 
   if (!ready || !event) return null;
 
@@ -60,12 +61,13 @@ export default function ParejaPage() {
         </button>
       </header>
 
-      {/* ── 1. CHARACTER HERO — ensemble image, full bleed ── */}
+      {/* ── 1. CHARACTER HERO — Andy focus ── */}
       <CharacterHero
         imageSrc="/characters/ensemble.png"
-        name="Miranda, Andy y Emily"
+        name="Andy Sachs"
         displayName="Celeste"
         message={event.parejaMessage}
+        objectPosition="75% top"
       />
 
       {/* ── 2. COUNTDOWN — cerulean blue ── */}

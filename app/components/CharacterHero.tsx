@@ -8,6 +8,7 @@ interface Props {
   name: string;
   displayName: string;
   message: string;
+  objectPosition?: string;
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -123,7 +124,7 @@ function EditorialArt({
    Main — real image with cinematic overlay + CSS filters.
    Grayscale + cerulean tint lifts on hover (desktop).
 ───────────────────────────────────────────────────────── */
-export default function CharacterHero({ imageSrc, name, displayName, message }: Props) {
+export default function CharacterHero({ imageSrc, name, displayName, message, objectPosition = "center top" }: Props) {
   const [imgError, setImgError] = useState(false);
   const [hovered,  setHovered]  = useState(false);
 
@@ -143,10 +144,11 @@ export default function CharacterHero({ imageSrc, name, displayName, message }: 
         src={imageSrc}
         alt={name}
         fill
-        className="object-cover object-top"
+        className="object-cover"
         priority
         onError={() => setImgError(true)}
         style={{
+          objectPosition,
           filter: hovered
             ? "grayscale(0%) sepia(0%) brightness(1)"
             : "grayscale(55%) sepia(12%) brightness(0.82)",

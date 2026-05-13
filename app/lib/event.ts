@@ -12,13 +12,14 @@ export interface EventData {
   };
 }
 
+/* Defaults match the API route — used as fallback if API is unreachable */
 const DEFAULTS: EventData = {
-  date: "2026-10-01T20:00:00",
-  venue: "Cine Palacio — Sala de Gala",
+  date: "2026-05-14T20:55:00",
+  venue: "Cinemark Trujillo - Mall Plaza",
   mamaMessage:
-    "Porque eres la primera persona con quien quiero vivir esta magia.",
+    "Porque sé lo mucho que te gusta poder compartir conmigo y yo amo verte disfrutar de las cosas, te amo mamá.",
   parejaMessage:
-    "Para la persona que hace que cada momento sea extraordinario.",
+    "Para mi corazón que no merece menos y adoro poder cumplir las cosas con las que incluso sueñas tener, te amo amor de mi vida.",
   snacks: [
     "🍿 Popcorn de mantequilla",
     "🍫 Chocolate negro",
@@ -30,37 +31,33 @@ const DEFAULTS: EventData = {
   coffeeOrders: { mama: "", pareja: "" },
 };
 
-function ok(): boolean {
-  return typeof window !== "undefined";
-}
-
-export function getEventData(): EventData {
-  if (!ok()) return DEFAULTS;
+export async function getEventData(): Promise<EventData> {
   try {
-    const raw = localStorage.getItem("dvlm_event");
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
+    const res = await fetch("/api/event", { cache: "no-store" });
+    if (!res.ok) return DEFAULTS;
+    return await res.json();
   } catch {
     return DEFAULTS;
   }
 }
 
-export function saveEventData(data: Partial<EventData>): void {
-  if (!ok()) return;
-  localStorage.setItem(
-    "dvlm_event",
-    JSON.stringify({ ...getEventData(), ...data })
+export async function saveEventData(data: Partial<EventData>): Promise<void> {
+  await fetch("/api/event", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function confirmRSVP(role: "mama" | "pareja"): Promise<void> {
+  await saveEventData(
+    role === "mama" ? { rsvpMama: true } : { rsvpPareja: true }
   );
 }
 
-export function confirmRSVP(role: "mama" | "pareja"): void {
-  if (!ok()) return;
-  saveEventData(role === "mama" ? { rsvpMama: true } : { rsvpPareja: true });
-}
-
-export function saveCoffeeOrder(role: "mama" | "pareja", drink: string): void {
-  if (!ok()) return;
-  const current = getEventData();
-  saveEventData({
-    coffeeOrders: { ...current.coffeeOrders, [role]: drink },
-  });
+export async function saveCoffeeOrder(
+  role: "mama" | "pareja",
+  drink: string
+): Promise<void> {
+  await saveEventData({ coffeeOrders: { [role]: drink } as EventData["coffeeOrders"] });
 }

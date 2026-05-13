@@ -29,15 +29,16 @@ export default function MamaPage() {
   useEffect(() => {
     const s = getSession();
     if (s !== "mama" && s !== "admin") { router.replace("/"); return; }
-    const data = getEventData();
-    setEvent(data);
-    setRsvpDone(data.rsvpMama);
-    setCoffeeOrder(data.coffeeOrders.mama);
-    setReady(true);
+    getEventData().then((data) => {
+      setEvent(data);
+      setRsvpDone(data.rsvpMama);
+      setCoffeeOrder(data.coffeeOrders.mama);
+      setReady(true);
+    });
   }, [router]);
 
-  const handleRSVP = () => { confirmRSVP("mama"); setRsvpDone(true); };
-  const handleDrink = (d: string) => { setCoffeeOrder(d); saveCoffeeOrder("mama", d); };
+  const handleRSVP  = async () => { await confirmRSVP("mama"); setRsvpDone(true); };
+  const handleDrink = async (d: string) => { setCoffeeOrder(d); await saveCoffeeOrder("mama", d); };
 
   if (!ready || !event) return null;
 
@@ -60,12 +61,13 @@ export default function MamaPage() {
         </button>
       </header>
 
-      {/* ── 1. CHARACTER HERO — ensemble image, full bleed ── */}
+      {/* ── 1. CHARACTER HERO — Miranda focus ── */}
       <CharacterHero
         imageSrc="/characters/ensemble.png"
-        name="Miranda, Andy y Emily"
+        name="Miranda Priestly"
         displayName="Mamá"
         message={event.mamaMessage}
+        objectPosition="20% top"
       />
 
       {/* ── 2. COUNTDOWN — cerulean blue ── */}
