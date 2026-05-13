@@ -7,7 +7,11 @@
       "Bash(git commit *)",
       "Bash(git branch *)",
       "Bash(git remote *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(npm install *)",
+      "Bash(taskkill *)",
+      "PowerShell(taskkill *)",
+      "Bash(Test-Path *)"
     ]
   }
 }

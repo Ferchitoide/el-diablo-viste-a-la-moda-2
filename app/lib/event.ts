@@ -12,7 +12,6 @@ export interface EventData {
   };
 }
 
-/* Defaults match the API route — used as fallback if API is unreachable */
 const DEFAULTS: EventData = {
   date: "2026-05-14T20:55:00",
   venue: "Cinemark Trujillo - Mall Plaza",
@@ -31,22 +30,63 @@ const DEFAULTS: EventData = {
   coffeeOrders: { mama: "", pareja: "" },
 };
 
-export async function getEventData(): Promise<EventData> {
+const LS_KEY = "dvlm_event";
+
+function lsRead(): EventData | null {
+  if (typeof window === "undefined") return null;
   try {
-    const res = await fetch("/api/event", { cache: "no-store" });
-    if (!res.ok) return DEFAULTS;
-    return await res.json();
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? (JSON.parse(raw) as EventData) : null;
   } catch {
-    return DEFAULTS;
+    return null;
   }
 }
 
+function lsWrite(data: EventData): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+  } catch {}
+}
+
+/* localStorage is the primary store — always fast, always available.
+   Redis (via /api/event) is synced in the background for cross-device access. */
+export async function getEventData(): Promise<EventData> {
+  const local = lsRead();
+  if (local) return local;
+
+  // No local data yet — try Redis (e.g. first load on a guest's phone)
+  try {
+    const res = await fetch("/api/event", { cache: "no-store" });
+    if (res.ok) {
+      const data = (await res.json()) as EventData;
+      lsWrite(data);
+      return data;
+    }
+  } catch {}
+
+  return DEFAULTS;
+}
+
 export async function saveEventData(data: Partial<EventData>): Promise<void> {
-  await fetch("/api/event", {
+  const current = lsRead() ?? DEFAULTS;
+  const merged: EventData = {
+    ...current,
+    ...data,
+    coffeeOrders: data.coffeeOrders
+      ? { ...current.coffeeOrders, ...data.coffeeOrders }
+      : current.coffeeOrders,
+  };
+
+  // Persist locally — immediate, no network required
+  lsWrite(merged);
+
+  // Background sync to Redis — enables cross-device access when configured
+  fetch("/api/event", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+    body: JSON.stringify(merged),
+  }).catch(() => {});
 }
 
 export async function confirmRSVP(role: "mama" | "pareja"): Promise<void> {
